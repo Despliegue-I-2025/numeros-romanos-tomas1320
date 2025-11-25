@@ -1,3 +1,25 @@
 {
-  "version": 2
+  "version": 2,
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "*" }
+      ]
+    },
+    {
+      "source": "/(r2a|a2r)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "*" }
+      ]
+    }
+  ],
+  "rewrites": [
+    { "source": "/r2a", "destination": "/api/romanos" },
+    { "source": "/a2r", "destination": "/api/romanos" }
+  ]
 }

@@ -103,67 +103,79 @@ function arabicToRoman(arabic) {
   return result;
 }
 
-module.exports = async (req, res) => {
-  // Habilitar CORS
+module.exports = (req, res) => {
+  // Habilitar CORS - IMPORTANTE para el evaluador
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', '*');
+  res.setHeader('Access-Control-Max-Age', '86400');
 
+  // Manejar preflight OPTIONS
   if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    res.status(200).end();
+    return;
   }
 
-  const path = req.url.split('?')[0];
+  // Extraer path de la URL
+  const urlParts = req.url.split('?');
+  const path = urlParts[0];
 
   // Endpoint: /r2a - Romano a Arábigo
-  if (path === '/r2a' || path === '/api/romanos/r2a') {
+  if (path === '/r2a' || path === '/api/romanos') {
     const { roman } = req.query;
 
     if (!roman || roman.trim() === '') {
-      return res.status(400).json({ 
+      res.status(400).json({ 
         error: 'Parámetro "roman" requerido y no puede estar vacío' 
       });
+      return;
     }
 
     const arabic = romanToArabic(roman);
 
     if (arabic === null) {
-      return res.status(400).json({ 
+      res.status(400).json({ 
         error: 'Número romano inválido' 
       });
+      return;
     }
 
-    return res.status(200).json({ arabic });
+    res.status(200).json({ arabic });
+    return;
   }
 
   // Endpoint: /a2r - Arábigo a Romano
-  if (path === '/a2r' || path === '/api/romanos/a2r') {
+  if (path === '/a2r') {
     const { arabic } = req.query;
 
     if (!arabic || arabic.trim() === '') {
-      return res.status(400).json({ 
+      res.status(400).json({ 
         error: 'Parámetro "arabic" requerido y no puede estar vacío' 
       });
+      return;
     }
 
     // Validar que sea un número válido
     if (!/^\d+$/.test(arabic.trim())) {
-      return res.status(400).json({ 
+      res.status(400).json({ 
         error: 'El parámetro "arabic" debe ser un número válido' 
       });
+      return;
     }
 
     const roman = arabicToRoman(arabic);
 
     if (roman === null) {
-      return res.status(400).json({ 
+      res.status(400).json({ 
         error: 'Número arábigo inválido. Debe estar entre 1 y 3999' 
       });
+      return;
     }
 
-    return res.status(200).json({ roman });
+    res.status(200).json({ roman });
+    return;
   }
 
   // Ruta no encontrada
-  return res.status(404).json({ error: 'Endpoint no encontrado' });
+  res.status(404).json({ error: 'Endpoint no encontrada' });
 };
