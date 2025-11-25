@@ -1,8 +1,4 @@
 // conversor.js
-
-// Mensajes de depuración para verificar la carga
-console.log("El archivo conversor.js se ha cargado correctamente");
-console.log("Versión: 1.0.0 - " + new Date().toISOString());
 function romanToArabic(roman) {
   console.log("Convirtiendo romano a arábigo:", roman); // Para depuración
   
