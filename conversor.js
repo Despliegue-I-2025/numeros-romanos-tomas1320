@@ -1,6 +1,9 @@
 // conversor.js
 function romanToArabic(roman) {
+  console.log("Convirtiendo romano a arábigo:", roman); // Para depuración
+  
   if (!roman || typeof roman !== 'string') {
+    console.log("Entrada no válida");
     return null;
   }
 
@@ -17,6 +20,7 @@ function romanToArabic(roman) {
 
   // Validar que solo contenga caracteres romanos válidos
   if (!/^[IVXLCDM]+$/.test(romanUpper)) {
+    console.log("Caracteres no válidos");
     return null;
   }
 
@@ -37,14 +41,19 @@ function romanToArabic(roman) {
 
   // Validar que el resultado sea positivo
   if (result <= 0) {
+    console.log("Resultado no positivo");
     return null;
   }
 
+  console.log("Resultado:", result); // Para depuración
   return result;
 }
 
 function arabicToRoman(arabic) {
+  console.log("Convirtiendo arábigo a romano:", arabic); // Para depuración
+  
   if (typeof arabic !== 'number' || arabic < 1 || arabic > 3999 || !Number.isInteger(arabic)) {
+    console.log("Número arábigo no válido");
     return null;
   }
 
@@ -74,10 +83,8 @@ function arabicToRoman(arabic) {
     }
   }
 
+  console.log("Resultado:", result); // Para depuración
   return result;
 }
 
-// Exportar para Node.js
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { romanToArabic, arabicToRoman };
-}
+// Eliminar la exportación de Node.js ya que no es necesaria en el navegador
