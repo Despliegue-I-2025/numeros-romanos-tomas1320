@@ -87,4 +87,6 @@ function arabicToRoman(arabic) {
   return result;
 }
 
-// Eliminar la exportación de Node.js ya que no es necesaria en el navegador
+// Asegurarse de que las funciones estén disponibles globalmente
+window.romanToArabic = romanToArabic;
+window.arabicToRoman = arabicToRoman;
