@@ -2,11 +2,19 @@
   "version": 2,
   "builds": [
     {
-      "src": "**",
-      "use": "@vercel/static"
+      "src": "api/romanos.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
+    {
+      "src": "/r2a",
+      "dest": "/api/romanos.js"
+    },
+    {
+      "src": "/a2r",
+      "dest": "/api/romanos.js"
+    },
     {
       "src": "/conversor.js",
       "dest": "/conversor.js"
