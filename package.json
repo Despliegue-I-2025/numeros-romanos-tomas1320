@@ -1,0 +1,9 @@
+{
+  "name": "numeros-romanos",
+  "version": "1.0.0",
+  "description": "Conversor de números romanos a arábigos y viceversa",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"No hay pruebas configuradas\""
+  }
+}
