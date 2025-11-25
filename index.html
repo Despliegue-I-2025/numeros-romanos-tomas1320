@@ -633,76 +633,44 @@
             
             // Convertir número romano a arábigo
             function convertToArabic() {
-                const romanNumber = romanInput.value.trim().toUpperCase();
+                const romanInput = document.getElementById('romanInput').value.trim().toUpperCase();
+                const resultElement = document.getElementById('romanResultValue');
                 
-                // Validación básica
-                if (!romanNumber) {
+                if (!romanInput) {
                     showRomanToArabicResult('Por favor ingresa un número romano', 'error');
                     return;
                 }
+
+                const result = romanToArabic(romanInput);
                 
-                // Validar caracteres permitidos
-                if (!/^[IVXLCDM]+$/i.test(romanNumber)) {
-                    showRomanToArabicResult('Caracteres inválidos. Usa solo I, V, X, L, C, D, M', 'error');
+                if (result === null) {
+                    showRomanToArabicResult('Número romano inválido', 'error');
                     return;
                 }
-                
-                try {
-                    if (typeof romanToArabic === 'function') {
-                        const arabicNumber = romanToArabic(romanNumber);
-                        
-                        if (arabicNumber === null) {
-                            throw new Error('Número romano inválido');
-                        }
-                        
-                        // Mostrar resultado
-                        showRomanToArabicResult(arabicNumber, 'success', romanNumber);
-                        
-                        // Guardar en el historial
-                        addToHistory(romanNumber, arabicNumber);
-                    } else {
-                        throw new Error('Función de conversión no encontrada');
-                    }
-                } catch (error) {
-                    showRomanToArabicResult('Error: ' + error.message, 'error');
-                }
+
+                showRomanToArabicResult(result, 'success', romanInput);
+                addToHistory(romanInput, result);
             }
             
             // Convertir número arábigo a romano
             function convertToRoman() {
-                const arabicNumber = parseInt(arabicInput.value.trim(), 10);
+                const arabicInput = parseInt(document.getElementById('arabicInput').value.trim(), 10);
+                const resultElement = document.getElementById('arabicResultValue');
                 
-                // Validación básica
-                if (isNaN(arabicNumber)) {
-                    showArabicToRomanResult('Por favor ingresa un número arábigo', 'error');
+                if (isNaN(arabicInput) || arabicInput < 1 || arabicInput > 3999) {
+                    showArabicToRomanResult('Por favor ingresa un número entre 1 y 3999', 'error');
                     return;
                 }
+
+                const result = arabicToRoman(arabicInput);
                 
-                // Validar rango
-                if (arabicNumber < 1 || arabicNumber > 3999) {
-                    showArabicToRomanResult('El número debe estar entre 1 y 3,999', 'error');
+                if (result === null) {
+                    showArabicToRomanResult('Error al convertir el número', 'error');
                     return;
                 }
-                
-                try {
-                    if (typeof arabicToRoman === 'function') {
-                        const romanNumber = arabicToRoman(arabicNumber);
-                        
-                        if (romanNumber === null) {
-                            throw new Error('Número arábigo inválido');
-                        }
-                        
-                        // Mostrar resultado
-                        showArabicToRomanResult(romanNumber, 'success', arabicNumber);
-                        
-                        // Guardar en el historial
-                        addToHistory(romanNumber, arabicNumber);
-                    } else {
-                        throw new Error('Función de conversión no encontrada');
-                    }
-                } catch (error) {
-                    showArabicToRomanResult('Error: ' + error.message, 'error');
-                }
+
+                showArabicToRomanResult(result, 'success', arabicInput.toString());
+                addToHistory(result, arabicInput);
             }
             
             // Agregar al historial
@@ -880,5 +848,6 @@
             transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         }
     </style>
+    <script src="conversor.js"></script>
 </body>
 </html>
