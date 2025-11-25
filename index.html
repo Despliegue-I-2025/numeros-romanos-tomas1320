@@ -1,853 +1,103 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Conversor profesional de números romanos a arábigos y viceversa">
-    <title>Conversor Profesional de Números Romanos</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔢</text></svg>">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --accent-color: #e74c3c;
-            --background-color: #f8f9fa;
-            --card-bg: #ffffff;
-            --text-color: #2c3e50;
-            --text-muted: #7f8c8d;
-            --border-color: #e0e0e0;
-            --success-color: #2ecc71;
-            --error-color: #e74c3c;
-            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            --transition: all 0.3s ease;
-        }
+<!-- Agregar esto antes del cierre del body -->
+<script>
+// Configuración de la API
+const API_ENDPOINT = 'https://api.romannumeralconverter.com/api/v1';
+const USE_API = true; // Cambiar a false para usar solo la lógica local
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+// Funciones de la API
+async function convertRomanToArabic(roman) {
+    if (!USE_API) {
+        return window.romanToArabicLocal(roman);
+    }
 
-        body {
-            background-color: var(--background-color);
-            color: var(--text-color);
-            line-height: 1.6;
-            padding: 0;
-            margin: 0;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            font-family: 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', sans-serif;
-        }
+    try {
+        const response = await fetch(`${API_ENDPOINT}/to-arabic?roman=${encodeURIComponent(roman)}`);
+        if (!response.ok) throw new Error('Error en la API');
+        const data = await response.json();
+        return data.arabic;
+    } catch (error) {
+        console.warn('Usando conversión local debido a error en la API');
+        return window.romanToArabicLocal(roman);
+    }
+}
 
-        header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            padding: 1.5rem 0;
-            box-shadow: var(--shadow-md);
-            margin-bottom: 2rem;
-        }
+async function convertArabicToRoman(arabic) {
+    if (!USE_API) {
+        return window.arabicToRomanLocal(arabic);
+    }
 
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    try {
+        const response = await fetch(`${API_ENDPOINT}/to-roman?number=${arabic}`);
+        if (!response.ok) throw new Error('Error en la API');
+        const data = await response.json();
+        return data.roman;
+    } catch (error) {
+        console.warn('Usando conversión local debido a error en la API');
+        return window.arabicToRomanLocal(arabic);
+    }
+}
 
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-size: 1.5rem;
-            font-weight: 700;
-            text-decoration: none;
-            color: white;
-        }
+// Registrar funciones locales como respaldo
+window.romanToArabicLocal = romanToArabic;
+window.arabicToRomanLocal = arabicToRoman;
 
-        .container {
-            max-width: 800px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 0 1.5rem 2rem;
-            flex: 1;
-        }
-
-        .card {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: var(--shadow-md);
-            margin-top: 1rem;
-            border: 1px solid var(--border-color);
-            transition: var(--transition);
-        }
-
-        .card:hover {
-            box-shadow: var(--shadow-lg);
-            transform: translateY(-2px);
-        }
-
-        h1 {
-            color: var(--primary-color);
-            text-align: center;
-            margin: 0 0 1.5rem 0;
-            font-size: 2rem;
-            font-weight: 700;
-            position: relative;
-            padding-bottom: 0.75rem;
-        }
-
-        h1::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60px;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-            border-radius: 2px;
-        }
-
-        .subtitle {
-            text-align: center;
-            color: var(--text-muted);
-            margin-bottom: 2rem;
-            font-size: 1.1rem;
-        }
-
-        .converter {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .converter-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1.5rem;
-        }
-
-        @media (min-width: 768px) {
-            .converter-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            position: relative;
-        }
-
-        .input-group label {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .input-group i {
-            color: var(--primary-color);
-        }
-
-        label {
-            font-weight: 600;
-            color: var(--secondary-color);
-        }
-
-        input[type="text"] {
-            padding: 0.8rem 1rem;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-            width: 100%;
-            background-color: #fff;
-        }
-
-        input[type="text"]:disabled {
-            background-color: #f5f5f5;
-            cursor: not-allowed;
-        }
-
-        input[type="text"]:focus {
-            outline: none;
-            border-color: var(--primary-color);
-        }
-
-        button {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            border: none;
-            padding: 0.8rem 2rem;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            box-shadow: var(--shadow-sm);
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        button:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        .btn-icon {
-            margin-right: 0.5rem;
-        }
-
-        button:hover {
-            background-color: var(--secondary-color);
-        }
-
-        .result-container {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1.5rem;
-            margin-top: 1.5rem;
-        }
-
-        @media (min-width: 768px) {
-            .result-container {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        .result {
-            padding: 1.5rem;
-            border-radius: 8px;
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            min-height: 150px;
-            font-weight: 500;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            transition: var(--transition);
-        }
-
-        .result.success {
-            border-left: 4px solid var(--success-color);
-            background-color: rgba(46, 204, 113, 0.05);
-        }
-
-        .result.error {
-            border-left: 4px solid var(--error-color);
-            background-color: rgba(231, 76, 60, 0.05);
-        }
-
-        .result-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            margin: 0.5rem 0;
-        }
-
-        .result-label {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .history {
-            margin-top: 2rem;
-        }
-
-        .history h2 {
-            font-size: 1.25rem;
-            margin-bottom: 1rem;
-            color: var(--primary-color);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .history-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            max-height: 300px;
-            overflow-y: auto;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-        }
-
-        .history-item {
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: var(--transition);
-        }
-
-        .history-item:last-child {
-            border-bottom: none;
-        }
-
-        .history-item:hover {
-            background-color: rgba(0, 0, 0, 0.02);
-        }
-
-        .history-roman {
-            font-weight: 600;
-            color: var(--primary-color);
-        }
-
-        .history-arabic {
-            font-family: 'Courier New', monospace;
-            background-color: var(--background-color);
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.9rem;
-        }
-
-        .clear-history {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            transition: var(--transition);
-        }
-
-        .clear-history:hover {
-            background-color: rgba(0, 0, 0, 0.05);
-            color: var(--error-color);
-        }
-
-        footer {
-            background-color: var(--primary-color);
-            color: white;
-            text-align: center;
-            padding: 1.5rem;
-            margin-top: 3rem;
-            font-size: 0.9rem;
-        }
-
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 1.5rem;
-        }
-
-        .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .footer-links a {
-            color: rgba(255, 255, 255, 0.8);
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        .footer-links a:hover {
-            color: white;
-            text-decoration: underline;
-        }
-
-        .copy {
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 0.85rem;
-        }
-
-        @media (min-width: 768px) {
-            .converter {
-                flex-direction: row;
-                align-items: flex-end;
-            }
-            
-            .input-group {
-                flex: 1;
-            }
-
-            .btn-group {
-                display: flex;
-                gap: 0.75rem;
-            }
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <div class="header-content">
-            <a href="/" class="logo">
-                <i class="fas fa-calculator"></i>
-                <span>RomanoPro</span>
-            </a>
-            <nav>
-                <a href="#about" class="nav-link">Acerca de</a>
-            </nav>
-        </div>
-    </header>
-
-    <main class="container">
-        <div class="card">
-            <h1>Conversor de Números Romanos</h1>
-            <p class="subtitle">Convierte fácilmente entre números romanos y arábigos</p>
-            
-            <div class="converter-grid">
-                <div class="card">
-                    <h3><i class="fas fa-exchange-alt"></i> Romano a Arábigo</h3>
-                    <div class="converter">
-                        <div class="input-group">
-                            <label for="romanInput">
-                                <i class="fas fa-font"></i>
-                                Número Romano:
-                            </label>
-                            <input 
-                                type="text" 
-                                id="romanInput" 
-                                placeholder="Ej: XIV" 
-                                maxlength="15"
-                                autocomplete="off"
-                                spellcheck="false"
-                                aria-label="Ingrese un número romano"
-                            />
-                            <small class="hint">Letras permitidas: I, V, X, L, C, D, M</small>
-                        </div>
-                        
-                        <div class="btn-group">
-                            <button id="convertToArabicBtn" class="btn-convert">
-                                <i class="fas fa-arrow-right"></i>
-                                Convertir
-                            </button>
-                            <button type="button" class="btn-clear" onclick="document.getElementById('romanInput').value = ''">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h3><i class="fas fa-exchange-alt"></i> Arábigo a Romano</h3>
-                    <div class="converter">
-                        <div class="input-group">
-                            <label for="arabicInput">
-                                <i class="fas fa-hashtag"></i>
-                                Número Arábigo:
-                            </label>
-                            <input 
-                                type="number" 
-                                id="arabicInput" 
-                                placeholder="Ej: 14" 
-                                min="1" 
-                                max="3999"
-                                autocomplete="off"
-                                spellcheck="false"
-                                aria-label="Ingrese un número arábigo"
-                            />
-                            <small class="hint">Números del 1 al 3,999</small>
-                        </div>
-                        
-                        <div class="btn-group">
-                            <button id="convertToRomanBtn" class="btn-convert">
-                                <i class="fas fa-arrow-right"></i>
-                                Convertir
-                            </button>
-                            <button type="button" class="btn-clear" onclick="document.getElementById('arabicInput').value = ''">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="result-container">
-                <div class="result" id="romanToArabicResult">
-                    <span class="result-label">Romano a Arábigo</span>
-                    <div class="result-value" id="romanResultValue">-</div>
-                    <div id="romanResultText">Ingresa un número romano</div>
-                </div>
-                
-                <div class="result" id="arabicToRomanResult">
-                    <span class="result-label">Arábigo a Romano</span>
-                    <div class="result-value" id="arabicResultValue">-</div>
-                    <div id="arabicResultText">Ingresa un número arábigo</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card history">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h2><i class="fas fa-history"></i> Historial de conversiones</h2>
-                <button id="clearHistoryBtn" class="clear-history">
-                    <i class="fas fa-trash"></i>
-                    <span>Limpiar</span>
-                </button>
-            </div>
-            <ul class="history-list" id="historyList">
-                <li class="history-empty">No hay conversiones recientes</li>
-            </ul>
-        </div>
-
-        <div class="card" id="about">
-            <h2><i class="fas fa-info-circle"></i> Acerca de</h2>
-            <p>Este conversor te permite transformar números romanos a arábigos y viceversa de manera rápida y precisa.</p>
-            
-            <h3 style="margin-top: 1.5rem;">¿Cómo usar?</h3>
-            <ol style="padding-left: 1.5rem; margin: 0.5rem 0 1.5rem;">
-                <li>Ingresa un número romano en el campo de texto (ejemplo: XIV, MCMXCVIII)</li>
-                <li>Haz clic en "Convertir" o presiona Enter</li>
-                <li>El resultado se mostrará en la sección inferior</li>
-            </ol>
-            
-            <h3>Valores de los símbolos romanos:</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.5rem; margin: 0.5rem 0 1.5rem;">
-                <div style="background: var(--background-color); padding: 0.5rem; border-radius: 4px; text-align: center;">
-                    <strong>I</strong> = 1
-                </div>
-                <div style="background: var(--background-color); padding: 0.5rem; border-radius: 4px; text-align: center;">
-                    <strong>V</strong> = 5
-                </div>
-                <div style="background: var(--background-color); padding: 0.5rem; border-radius: 4px; text-align: center;">
-                    <strong>X</strong> = 10
-                </div>
-                <div style="background: var(--background-color); padding: 0.5rem; border-radius: 4px; text-align: center;">
-                    <strong>L</strong> = 50
-                </div>
-                <div style="background: var(--background-color); padding: 0.5rem; border-radius: 4px; text-align: center;">
-                    <strong>C</strong> = 100
-                </div>
-                <div style="background: var(--background-color); padding: 0.5rem; border-radius: 4px; text-align: center;">
-                    <strong>D</strong> = 500
-                </div>
-                <div style="background: var(--background-color); padding: 0.5rem; border-radius: 4px; text-align: center;">
-                    <strong>M</strong> = 1000
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <footer>
-        <div class="footer-content">
-            <div class="footer-links">
-                <a href="#about"><i class="fas fa-info-circle"></i> Acerca de</a>
-                <a href="#" id="themeToggle"><i class="fas fa-moon"></i> Tema oscuro</a>
-            </div>
-            <p class="copy">© 2025 Conversor de Números Romanos. Todos los derechos reservados.</p>
-        </div>
-    </footer>
-
-    <script src="conversor.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Elementos del DOM
-            const romanInput = document.getElementById('romanInput');
-            const arabicInput = document.getElementById('arabicInput');
-            const convertToArabicBtn = document.getElementById('convertToArabicBtn');
-            const convertToRomanBtn = document.getElementById('convertToRomanBtn');
-            const clearHistoryBtn = document.getElementById('clearHistoryBtn');
-            
-            // Elementos de resultados
-            const romanResultValue = document.getElementById('romanResultValue');
-            const romanResultText = document.getElementById('romanResultText');
-            const arabicResultValue = document.getElementById('arabicResultValue');
-            const arabicResultText = document.getElementById('arabicResultText');
-            
-            const historyList = document.getElementById('historyList');
-            const themeToggle = document.getElementById('themeToggle');
-            
-            // Cargar historial desde localStorage
-            let history = JSON.parse(localStorage.getItem('romanConverterHistory')) || [];
-            
-            // Cargar tema guardado
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            updateThemeIcon(savedTheme);
-            
-            // Actualizar el historial en la UI
-            function updateHistoryUI() {
-                const historyItems = history.map(item => `
-                    <li class="history-item">
-                        <span class="history-roman">${item.roman}</span>
-                        <span class="history-arabic">${item.arabic}</span>
-                    </li>
-                `).join('');
-                
-                historyList.innerHTML = history.length > 0 
-                    ? historyItems 
-                    : '<li class="history-empty">No hay conversiones recientes</li>';
-                
-                // Guardar en localStorage
-                localStorage.setItem('romanConverterHistory', JSON.stringify(history));
-            }
-            
-            // Actualizar el icono del tema
-            function updateThemeIcon(theme) {
-                const icon = themeToggle.querySelector('i');
-                if (theme === 'dark') {
-                    icon.classList.remove('fa-moon');
-                    icon.classList.add('fa-sun');
-                } else {
-                    icon.classList.remove('fa-sun');
-                    icon.classList.add('fa-moon');
-                }
-            }
-            
-            // Alternar tema claro/oscuro
-            themeToggle.addEventListener('click', function(e) {
-                e.preventDefault();
-                const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-                
-                document.documentElement.setAttribute('data-theme', newTheme);
-                localStorage.setItem('theme', newTheme);
-                updateThemeIcon(newTheme);
-            });
-            
-            // Convertir número romano a arábigo
-            function convertToArabic() {
-                const romanInput = document.getElementById('romanInput').value.trim().toUpperCase();
-                const resultElement = document.getElementById('romanResultValue');
-                
-                if (!romanInput) {
-                    showRomanToArabicResult('Por favor ingresa un número romano', 'error');
-                    return;
-                }
-
-                const result = romanToArabic(romanInput);
-                
-                if (result === null) {
-                    showRomanToArabicResult('Número romano inválido', 'error');
-                    return;
-                }
-
-                showRomanToArabicResult(result, 'success', romanInput);
-                addToHistory(romanInput, result);
-            }
-            
-            // Convertir número arábigo a romano
-            function convertToRoman() {
-                const arabicInput = parseInt(document.getElementById('arabicInput').value.trim(), 10);
-                const resultElement = document.getElementById('arabicResultValue');
-                
-                if (isNaN(arabicInput) || arabicInput < 1 || arabicInput > 3999) {
-                    showArabicToRomanResult('Por favor ingresa un número entre 1 y 3999', 'error');
-                    return;
-                }
-
-                const result = arabicToRoman(arabicInput);
-                
-                if (result === null) {
-                    showArabicToRomanResult('Error al convertir el número', 'error');
-                    return;
-                }
-
-                showArabicToRomanResult(result, 'success', arabicInput.toString());
-                addToHistory(result, arabicInput);
-            }
-            
-            // Agregar al historial
-            function addToHistory(roman, arabic) {
-                history.unshift({
-                    roman: roman,
-                    arabic: arabic,
-                    date: new Date().toISOString()
-                });
-                
-                // Mantener solo los últimos 10 elementos
-                if (history.length > 10) {
-                    history.pop();
-                }
-                
-                updateHistoryUI();
-            }
-            
-            // Mostrar resultado de romano a arábigo
-            function showRomanToArabicResult(value, type = 'success', romanNumber = '') {
-                const resultDiv = document.getElementById('romanToArabicResult');
-                
-                // Limpiar clases anteriores
-                resultDiv.className = 'result';
-                
-                if (type === 'success') {
-                    resultDiv.classList.add('success');
-                    romanResultValue.textContent = value;
-                    romanResultText.textContent = `${romanNumber} en números arábigos es:`;
-                } else {
-                    resultDiv.classList.add('error');
-                    romanResultValue.textContent = 'Error';
-                    romanResultText.textContent = value;
-                }
-            }
-            
-            // Mostrar resultado de arábigo a romano
-            function showArabicToRomanResult(value, type = 'success', arabicNumber = '') {
-                const resultDiv = document.getElementById('arabicToRomanResult');
-                
-                // Limpiar clases anteriores
-                resultDiv.className = 'result';
-                
-                if (type === 'success') {
-                    resultDiv.classList.add('success');
-                    arabicResultValue.textContent = value;
-                    arabicResultText.textContent = `${arabicNumber} en números romanos es:`;
-                } else {
-                    resultDiv.classList.add('error');
-                    arabicResultValue.textContent = 'Error';
-                    arabicResultText.textContent = value;
-                }
-            }
-            
-            // Limpiar entradas
-            function clearInputs() {
-                romanInput.value = '';
-                arabicInput.value = '';
-                romanInput.focus();
-                showRomanToArabicResult('Ingresa un número romano', 'info');
-                showArabicToRomanResult('Ingresa un número arábigo', 'info');
-            }
-            
-            // Limpiar historial
-            function clearHistory() {
-                if (history.length > 0) {
-                    if (confirm('¿Estás seguro de que deseas borrar el historial?')) {
-                        history = [];
-                        updateHistoryUI();
-                    }
-                }
-            }
-            
-            // Event listeners
-            convertToArabicBtn.addEventListener('click', convertToArabic);
-            convertToRomanBtn.addEventListener('click', convertToRoman);
-            clearHistoryBtn.addEventListener('click', clearHistory);
-            
-            // Convertir al presionar Enter
-            romanInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    convertToArabic();
-                }
-            });
-            
-            arabicInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    convertToRoman();
-                }
-            });
-            
-            // Validación en tiempo real para números romanos
-            romanInput.addEventListener('input', function(e) {
-                // Convertir a mayúsculas automáticamente
-                e.target.value = e.target.value.toUpperCase();
-                
-                // Validar caracteres permitidos
-                if (!/^[IVXLCDM]*$/i.test(e.target.value)) {
-                    // Eliminar caracteres no permitidos
-                    e.target.value = e.target.value.replace(/[^IVXLCDM]/gi, '');
-                }
-            });
-            
-            // Validación en tiempo real para números arábigos
-            arabicInput.addEventListener('input', function(e) {
-                // Limitar a números positivos
-                if (e.target.value < 0) {
-                    e.target.value = '';
-                }
-                
-                // Limitar a 4 dígitos
-                if (e.target.value.length > 4) {
-                    e.target.value = e.target.value.slice(0, 4);
-                }
-            });
-            
-            // Inicializar UI
-            updateHistoryUI();
-            showRomanToArabicResult('Ingresa un número romano', 'info');
-            showArabicToRomanResult('Ingresa un número arábigo', 'info');
-        });
-    </script>
+// Actualizar manejadores de eventos
+document.addEventListener('DOMContentLoaded', function() {
+    const convertToArabicBtn = document.getElementById('convertToArabicBtn');
+    const convertToRomanBtn = document.getElementById('convertToRomanBtn');
     
-    <style>
-        /* Estilos para el tema oscuro */
-        [data-theme="dark"] {
-            --primary-color: #3498db;
-            --secondary-color: #2c3e50;
-            --background-color: #1a1a1a;
-            --card-bg: #2d2d2d;
-            --text-color: #f5f5f5;
-            --text-muted: #b0b0b0;
-            --border-color: #404040;
-        }
-        
-        [data-theme="dark"] body {
-            background-color: var(--background-color);
-            color: var(--text-color);
-        }
-        
-        [data-theme="dark"] .card {
-            border-color: var(--border-color);
-        }
-        
-        [data-theme="dark"] input[type="text"] {
-            background-color: #3a3a3a;
-            border-color: #4a4a4a;
-            color: #f5f5f5;
-        }
-        
-        [data-theme="dark"] input[type="text"]:disabled {
-            background-color: #2a2a2a;
-        }
-        
-        [data-theme="dark"] .history-item:hover {
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-        
-        [data-theme="dark"] .history-arabic {
-            background-color: #3a3a3a;
-            color: #f5f5f5;
-        }
-        
-        [data-theme="dark"] .clear-history {
-            color: var(--text-muted);
-        }
-        
-        [data-theme="dark"] .clear-history:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: var(--error-color);
-        }
-        
-        /* Transición suave para el cambio de tema */
-        body, .card, input, button {
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-        }
-    </style>
-    <script src="conversor.js"></script>
-</body>
-</html>
+    if (convertToArabicBtn) {
+        convertToArabicBtn.addEventListener('click', async function() {
+            const romanInput = document.getElementById('romanInput');
+            const resultElement = document.getElementById('result');
+            
+            if (!romanInput || !resultElement) return;
+            
+            const roman = romanInput.value.trim().toUpperCase();
+            if (!roman) {
+                resultElement.textContent = 'Por favor ingresa un número romano';
+                return;
+            }
+            
+            try {
+                const arabic = await convertRomanToArabic(roman);
+                if (arabic === null) {
+                    resultElement.textContent = 'Número romano inválido';
+                    return;
+                }
+                resultElement.textContent = `Resultado: ${arabic}`;
+            } catch (error) {
+                console.error('Error en la conversión:', error);
+                resultElement.textContent = 'Error al convertir el número romano';
+            }
+        });
+    }
+
+    if (convertToRomanBtn) {
+        convertToRomanBtn.addEventListener('click', async function() {
+            const arabicInput = document.getElementById('arabicInput');
+            const resultElement = document.getElementById('result');
+            
+            if (!arabicInput || !resultElement) return;
+            
+            const arabic = parseInt(arabicInput.value, 10);
+            if (isNaN(arabic) || arabic < 1 || arabic > 3999) {
+                resultElement.textContent = 'Por favor ingresa un número entre 1 y 3999';
+                return;
+            }
+            
+            try {
+                const roman = await convertArabicToRoman(arabic);
+                if (roman === null) {
+                    resultElement.textContent = 'Error en la conversión';
+                    return;
+                }
+                resultElement.textContent = `Resultado: ${roman}`;
+            } catch (error) {
+                console.error('Error en la conversión:', error);
+                resultElement.textContent = 'Error al convertir el número arábigo';
+            }
+        });
+    }
+});
+</script>
