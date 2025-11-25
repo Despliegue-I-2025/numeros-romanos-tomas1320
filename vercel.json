@@ -6,26 +6,8 @@
       "use": "@vercel/node"
     }
   ],
-  "routes": [
-    {
-      "src": "/r2a",
-      "dest": "/api/romanos.js"
-    },
-    {
-      "src": "/a2r",
-      "dest": "/api/romanos.js"
-    },
-    {
-      "src": "/conversor.js",
-      "dest": "/conversor.js"
-    },
-    {
-      "src": "/(.*\\.(css|js|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot))",
-      "dest": "/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
+  "rewrites": [
+    { "source": "/r2a", "destination": "/api/romanos" },
+    { "source": "/a2r", "destination": "/api/romanos" }
   ]
 }
