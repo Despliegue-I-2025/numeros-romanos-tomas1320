@@ -26,29 +26,17 @@ function romanToArabic(roman) {
     return null;
   }
 
-  // Validar orden incorrecto (VX, LC, DM, etc)
-  const invalidPatterns = [
-    'VX', 'VL', 'VC', 'VD', 'VM',
-    'LC', 'LD', 'LM',
-    'DM'
-  ];
-  
-  for (const pattern of invalidPatterns) {
-    if (romanUpper.includes(pattern)) {
-      return null;
-    }
-  }
-
   // Validar sustracciones inválidas
   // I solo puede restar de V y X
   // X solo puede restar de L y C
   // C solo puede restar de D y M
+  // V, L, D nunca restan
   const invalidSubtractions = [
-    'IL', 'IC', 'ID', 'IM',  // I no puede restar de L, C, D, M
-    'XD', 'XM',              // X no puede restar de D, M
-    'VX', 'VL', 'VC', 'VD', 'VM',  // V nunca resta
-    'LC', 'LD', 'LM',        // L nunca resta
-    'DM'                     // D nunca resta
+    'IL', 'IC', 'ID', 'IM',           // I no puede restar de L, C, D, M
+    'XD', 'XM',                       // X no puede restar de D, M
+    'VX', 'VL', 'VC', 'VD', 'VM',    // V nunca resta
+    'LC', 'LD', 'LM',                 // L nunca resta
+    'DM'                              // D nunca resta
   ];
   
   for (const pattern of invalidSubtractions) {
