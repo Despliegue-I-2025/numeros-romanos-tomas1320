@@ -16,38 +16,23 @@ function romanToArabic(roman) {
     'M': 1000
   };
 
-  // Validar que solo contenga caracteres romanos válidos
+  // 1. Validar que solo contenga caracteres romanos válidos
   if (!/^[IVXLCDM]+$/.test(romanUpper)) {
     return null;
   }
 
-  // Validar repeticiones excesivas (IIII, XXXX, etc)
-  if (/I{4,}|X{4,}|C{4,}|M{4,}/.test(romanUpper)) {
+  // 2. Validar repeticiones excesivas (I, X, C, M no más de 3. V, L, D nunca 2 o más)
+  if (/I{4,}|X{4,}|C{4,}|M{4,}|V{2,}|L{2,}|D{2,}/.test(romanUpper)) {
     return null;
   }
-
-  // Validar sustracciones inválidas
-  // I solo puede restar de V y X
-  // X solo puede restar de L y C
-  // C solo puede restar de D y M
-  // V, L, D nunca restan
-  const invalidSubtractions = [
-    'IL', 'IC', 'ID', 'IM',           // I no puede restar de L, C, D, M
-    'XD', 'XM',                       // X no puede restar de D, M
-    'VX', 'VL', 'VC', 'VD', 'VM',    // V nunca resta
-    'LC', 'LD', 'LM',                 // L nunca resta
-    'DM'                              // D nunca resta
-  ];
   
-  for (const pattern of invalidSubtractions) {
-    if (romanUpper.includes(pattern)) {
-      return null;
-    }
-  }
+  // 3. (Opcional) Eliminar validaciones de sustracción inválida porque la re-conversión
+  //    (punto 6) validará la estructura canónica de forma más robusta.
 
   let result = 0;
   let prevValue = 0;
 
+  // 4. Implementación del algoritmo de conversión aditiva/sustractiva (lectura de derecha a izquierda)
   for (let i = romanUpper.length - 1; i >= 0; i--) {
     const currentValue = romanValues[romanUpper[i]];
     
@@ -60,11 +45,21 @@ function romanToArabic(roman) {
     prevValue = currentValue;
   }
 
-  if (result <= 0) {
+  // 5. Validar que el número no sea cero o esté fuera del rango manejado (1 a 3999)
+  if (result <= 0 || result > 3999) {
     return null;
   }
+  
+  // 6. Validación Estructural (Canónica): El arábigo resultante debe convertir
+  //    de vuelta al *mismo* romano de entrada para ser considerado válido.
+  const reConvertedRoman = arabicToRoman(result);
 
-  return result;
+  if (reConvertedRoman === romanUpper) {
+    return result;
+  } else {
+    // Esto captura números como "MMMCMMM" (que se convierten a 3900 pero no son su forma canónica)
+    return null; 
+  }
 }
 
 function arabicToRoman(arabic) {
