@@ -1,13 +1,13 @@
 // conversor.js
 function romanToArabic(roman) {
-  console.log("Convirtiendo romano a arábigo:", roman); // Para depuración
+  console.log("Convirtiendo romano a arábigo:", roman);
   
   if (!roman || typeof roman !== 'string') {
     console.log("Entrada no válida");
     return null;
   }
 
-  const romanUpper = roman.toUpperCase();
+  const romanUpper = roman.toUpperCase().trim();
   const romanValues = {
     'I': 1,
     'V': 5,
@@ -45,12 +45,12 @@ function romanToArabic(roman) {
     return null;
   }
 
-  console.log("Resultado:", result); // Para depuración
+  console.log("Resultado:", result);
   return result;
 }
 
 function arabicToRoman(arabic) {
-  console.log("Convirtiendo arábigo a romano:", arabic); // Para depuración
+  console.log("Convirtiendo arábigo a romano:", arabic);
   
   if (typeof arabic !== 'number' || arabic < 1 || arabic > 3999 || !Number.isInteger(arabic)) {
     console.log("Número arábigo no válido");
@@ -83,10 +83,6 @@ function arabicToRoman(arabic) {
     }
   }
 
-  console.log("Resultado:", result); // Para depuración
+  console.log("Resultado:", result);
   return result;
 }
-
-// Asegurarse de que las funciones estén disponibles globalmente
-window.romanToArabic = romanToArabic;
-window.arabicToRoman = arabicToRoman;
