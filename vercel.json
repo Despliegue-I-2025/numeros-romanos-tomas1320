@@ -1,13 +1,3 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "api/romanos.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "rewrites": [
-    { "source": "/r2a", "destination": "/api/romanos" },
-    { "source": "/a2r", "destination": "/api/romanos" }
-  ]
+  "version": 2
 }
